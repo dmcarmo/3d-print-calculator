@@ -4,6 +4,7 @@ import os
 import subprocess
 import math
 import csv
+import datetime
 from tempfile import NamedTemporaryFile
 import shutil
 from gcoder import GCode
@@ -45,6 +46,9 @@ def generate_gcode():
 def process_gcode():
     tempfile = NamedTemporaryFile("w+t", newline="", delete=False)
     outputfile = "./output.csv"
+    total_duration = datetime.timedelta(0)
+    total_length = 0
+    total_weight = 0
     # for each file in csv process the corresponding gcode
     with open(outputfile, "r") as csvfile, tempfile:
         fieldnames = [
@@ -59,12 +63,16 @@ def process_gcode():
         writer.writeheader()
         for row in reader:
             filename = row["Model"].replace("stl", "gcode")
+            quantity = int(row["Quantity"])
             gcode = GCode(open(filename, "r"))
             used_filament_length = gcode.filament_length
+            total_length += used_filament_length * quantity
             print_time = gcode.duration  # datetime.timedelta(seconds)
+            total_duration += print_time * quantity
             used_filament_weight = (
                 FILAMENT_DENSITY * (used_filament_length * FILAMENT_SECTION_AREA) / 1000
             )
+            total_weight += used_filament_weight * quantity
             writer.writerow(
                 {
                     "Model": row["Model"],
@@ -74,6 +82,15 @@ def process_gcode():
                     "Used_Filament_weight": round(used_filament_weight, 2),
                 }
             )
+        writer.writerow(
+            {
+                "Model": "Total",
+                "Quantity": "",
+                "Duration": total_duration,
+                "Used_Filament_length": round(total_length / 1000, 2),
+                "Used_Filament_weight": round(total_weight, 2),
+            }
+        )
     shutil.move(tempfile.name, outputfile)
 
 
