@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import os
+import subprocess
 import math
 import csv
-import gcoder
+from gcoder import GCode
 
 # CONSTANTS
 
@@ -26,19 +27,27 @@ def createproject():
 
 
 # for each file in csv generate the gcode
-filename = "'123 x.stl'"
-OPTIONS = "-solid-infill-speed 140 --infill-speed 140 --external-perimeter-speed 40 --perimeter-speed 50 --skirt-height 3 --external-perimeter-extrusion-width 0.45 --extrusion-width 0.45 --fill-pattern grid --perimeters 2 --top-solid-layers 5 --bottom-solid-layers 4 --fill-density 20 --filament-diameter 1.75 --nozzle-diameter 0.4 --first-layer-height 0.2 --layer-height 0.2"
-command = "slic3r %s %s" % (OPTIONS, filename)
+def generate_gcode():
+    options = "--solid-infill-speed 140 --infill-speed 140 --external-perimeter-speed 40 --perimeter-speed 50 --skirt-height 3 --external-perimeter-extrusion-width 0.45 --extrusion-width 0.45 --fill-pattern grid --perimeters 2 --top-solid-layers 5 --bottom-solid-layers 4 --fill-density 20 --filament-diameter 1.75 --nozzle-diameter 0.4 --first-layer-height 0.2 --layer-height 0.2".split()
+    with open("./output.csv", "r") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            filename = [row[0]]
+            args = ["slic3r"] + options + filename
+            subprocess.run(args)
+    print("GCODE DONE!")
+
 
 # for each file in csv process the corresponding gcode
-gcode_file = "'123 x.gcode'"
-gcode = gcoder.GCode(open(gcode_file, "rU"))
-used_filament_length = gcode.filament_length
-print_time = gcode.duration  # datetime.timedelta(seconds)
+# gcode_file = "'123 x.gcode'"
+# gcode = gcoder.GCode(open(gcode_file, "rU"))
+# used_filament_length = gcode.filament_length
+# print_time = gcode.duration  # datetime.timedelta(seconds)
 
-used_filament_weight = (
-    FILAMENT_DENSITY * (used_filament_length * FILAMENT_SECTION_AREA) / 1000
-)
+# used_filament_weight = (
+#     FILAMENT_DENSITY * (used_filament_length * FILAMENT_SECTION_AREA) / 1000
+# )
+
 # append values (per part and for the total quantity) to csv row
 
 # finally sum the total weight, length and duration for the project and calculate the total cost
@@ -46,6 +55,7 @@ used_filament_weight = (
 
 def main():
     print("HELLO")
+    generate_gcode()
 
 
 if __name__ == "__main__":
