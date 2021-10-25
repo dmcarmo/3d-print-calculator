@@ -30,9 +30,9 @@ def createproject():
 def generate_gcode():
     options = "--solid-infill-speed 140 --infill-speed 140 --external-perimeter-speed 40 --perimeter-speed 50 --skirt-height 3 --external-perimeter-extrusion-width 0.45 --extrusion-width 0.45 --fill-pattern grid --perimeters 2 --top-solid-layers 5 --bottom-solid-layers 4 --fill-density 20 --filament-diameter 1.75 --nozzle-diameter 0.4 --first-layer-height 0.2 --layer-height 0.2".split()
     with open("./output.csv", "r") as csvfile:
-        reader = csv.reader(csvfile)
+        reader = csv.DictReader(csvfile)
         for row in reader:
-            filename = [row[0]]
+            filename = [row["Model"]]
             args = ["slic3r"] + options + filename
             subprocess.run(args)
     print("GCODE DONE!")
