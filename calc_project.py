@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import sys
 import os
 import subprocess
 import math
@@ -9,7 +9,7 @@ import shutil
 from gcoder import GCode
 
 # CONSTANTS
-
+USAGE = f"Usage: {sys.argv[0]} | [--create-project]"
 FILAMENT_WIDTH = 1.75  # mm
 FILAMENT_SECTION_AREA = math.pi * math.pow((FILAMENT_WIDTH / 2), 2)  # mm2
 FILAMENT_DENSITY = 1.24  # g/cm3
@@ -81,13 +81,18 @@ def process_gcode():
 
 
 def main():
-    print("HELLO")
-    create_project()
-    print("Project file created")
-    generate_gcode()
-    print("GCODE DONE!")
-    process_gcode()
-    print("GCODE Processed!")
+    args = sys.argv[1:]
+    if not args:
+        print("HELLO")
+        generate_gcode()
+        print("GCODE DONE!")
+        process_gcode()
+        print("GCODE Processed!")
+    elif args[0] == "--create-project":
+        create_project()
+        print("Project file created")
+    else:
+        print(USAGE)
 
 
 if __name__ == "__main__":
